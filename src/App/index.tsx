@@ -16,6 +16,7 @@ import {
 	toggleTodoAction
 } from '../redux/todoSlice';
 import { selectTodoActionCreator } from '../redux/selectedSlice';
+import { fetchTodos } from './../redux/todoSlice';
 
 const App = function() {
 	const dispatch = useDispatch();
@@ -60,10 +61,11 @@ const App = function() {
 	};
 
 	useEffect(() => {
+		dispatch(fetchTodos());
 		if (isEditMode) {
 			editInput?.current?.focus();
 		}
-	}, [isEditMode]);
+	}, [isEditMode, dispatch]);
 
 	const handleUpdate = (e: FormEvent<HTMLFormElement>): void => {
 		e.preventDefault();
@@ -113,16 +115,20 @@ const App = function() {
 			<div className="App__body">
 				<ul className="App__list">
 					<h2>My Todos:</h2>
-					{todos.map((todo, i) => (
-						<li
-							className={`${todo.isComplete ? 'done' : ''} ${
-								todo.id === selectedTodoId ? 'active' : ''
-							}`}
-							key={todo.id}
-							onClick={handleSelectTodo(todo.id)}>
-							<span className="list-number">{i + 1})</span> {todo.desc}
-						</li>
-					))}
+					{todos.length ? (
+						todos.map((todo, i) => (
+							<li
+								className={`${todo.isComplete ? 'done' : ''} ${
+									todo.id === selectedTodoId ? 'active' : ''
+								}`}
+								key={todo.id}
+								onClick={handleSelectTodo(todo.id)}>
+								<span className="list-number">{i + 1})</span> {todo.desc}
+							</li>
+						))
+					) : (
+						<p>There is no todos</p>
+					)}
 				</ul>
 				<div className="App_todo-info">
 					<h2>Selected Todo:</h2>
