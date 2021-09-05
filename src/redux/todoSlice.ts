@@ -1,30 +1,28 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import axios from 'axios';
 
 import { v4 as uuid } from 'uuid';
 
-import { Todo } from '../type';
+import { Todo, TodoApi } from './../type.d';
 
-const todos: Todo[] = [
-	{
-		id: uuid(),
-		desc: 'Learn React',
-		isComplete: true
-	},
-	{
-		id: uuid(),
-		desc: 'Learn Redux',
-		isComplete: true
-	},
-	{
-		id: uuid(),
-		desc: 'Learn Redux-ToolKit',
-		isComplete: false
-	}
-];
+export const fetchTodos = createAsyncThunk('users/1/todos', async () => {
+	const response: Todo[] = await axios
+		.get('https://jsonplaceholder.typicode.com/users/1/todos')
+		.then((res) => {
+			return res.data.map((arr: TodoApi) => ({
+				id: uuid(),
+				desc: arr.title,
+				isCompleted: arr.completed
+			}));
+		})
+		.catch((err) => console.log(err));
+
+	return response;
+});
 
 const todoSlice = createSlice({
 	name: 'todos',
-	initialState: todos,
+	initialState: [] as Todo[],
 	reducers: {
 		create: {
 			reducer: (
@@ -61,6 +59,13 @@ const todoSlice = createSlice({
 				state.splice(index, 1);
 			}
 		}
+	},
+	extraReducers: (builder) => {
+		builder.addCase(fetchTodos.fulfilled, (state, { payload }) => {
+			payload.forEach((todo) => {
+				state.push(todo);
+			});
+		});
 	}
 });
 
